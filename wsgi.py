@@ -49,7 +49,6 @@ def get_product(id):
 @app.route('/api/v1/products/<int:id>', methods=['DELETE'])
 def del_product(id):
     if id in PRODUCTS_MAP:
-        ID.prev()
         del PRODUCTS_MAP[id]
         return jsonify(PRODUCTS_MAP)
     abort(404)
@@ -59,4 +58,11 @@ def create_product():
     index = ID.next()
     body = request.get_json()
     PRODUCTS_MAP.update({index: {'id': index, 'name': body['name']}})
+    return jsonify(PRODUCTS_MAP)
+
+@app.route('/api/v1/products/<int:id>', methods=['PATCH'])
+def patch_product(id):
+    if id in PRODUCTS_MAP:
+        body = request.get_json()
+        PRODUCTS_MAP.update({id: {'id': id, 'name': body['name']}})
     return jsonify(PRODUCTS_MAP)
