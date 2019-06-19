@@ -3,6 +3,20 @@ from flask import Flask, jsonify, abort, render_template, request, make_response
 app = Flask(__name__)
 
 
+class Counter:
+    def __init__(self):
+        self.id = 3
+
+    def next(self):
+        self.id += 1
+        return self.id
+    
+    def prev(self):
+        self.id -= 1
+        return self.id
+
+ID = Counter()
+
 PRODUCTS = [
     {'id': 2, 'name': 'Socialive.tv'},
     {'id': 3, 'name': 'Twitter'},
@@ -24,20 +38,25 @@ def page_not_found(error):
 
 @app.route('/api/v1/products')
 def get_products():
-    return jsonify(PRODUCTS) 
+    return jsonify(PRODUCTS_MAP) 
 
 @app.route('/api/v1/products/<int:id>')
 def get_product(id):
-    result = PRODUCTS_MAP.get(id)
-    if result:
-        return jsonify(result)
+    if id in PRODUCTS_MAP:
+        return jsonify(PRODUCTS_MAP[id])
     abort(404)
 
 @app.route('/api/v1/products/<int:id>', methods=['DELETE'])
 def del_product(id):
-    result = PRODUCTS_MAP.get(id)
-    if result:
+    if id in PRODUCTS_MAP:
+        ID.prev()
         del PRODUCTS_MAP[id]
         return jsonify(PRODUCTS_MAP)
-        make_response('Item deleted', 200)
     abort(404)
+
+@app.route('/api/v1/products', methods=['POST'])
+def create_product():
+    index = ID.next()
+    body = request.get_json()
+    PRODUCTS_MAP.update({index: {'id': index, 'name': body['name']}})
+    return jsonify(PRODUCTS_MAP)
